@@ -1,0 +1,499 @@
+PROCEDURE OLE2_WORD_TEST IS
+happlication CLIENT_ole2.obj_type;
+hwindow CLIENT_ole2.obj_type;
+hpane CLIENT_ole2.obj_type;
+hview CLIENT_ole2.obj_type;
+hdocuments CLIENT_ole2.obj_type;
+hdocument CLIENT_ole2.obj_type;
+hselection CLIENT_ole2.obj_type;
+hparagraphformat CLIENT_ole2.obj_type;
+hrange CLIENT_ole2.obj_type;
+hfields CLIENT_ole2.obj_type;
+hfont CLIENT_ole2.obj_type;
+hinlineshapes CLIENT_ole2.obj_type;
+hpars CLIENT_ole2.obj_type;
+hpar CLIENT_ole2.obj_type;
+htabstops CLIENT_ole2.obj_type;
+hactivedocument CLIENT_ole2.obj_type;
+htables CLIENT_ole2.obj_type;
+htable CLIENT_ole2.obj_type;
+hcolumns CLIENT_ole2.obj_type;
+hcells CLIENT_ole2.obj_type;
+hrows CLIENT_ole2.obj_type;
+hshading CLIENT_ole2.obj_type;
+hinsertrow CLIENT_ole2.obj_type;
+hborders CLIENT_ole2.obj_type;
+hshading CLIENT_ole2.obj_type;
+args CLIENT_ole2.list_type;
+wdalignparagraphleft CONSTANT NUMBER (3) := 0;
+wdalignparagraphcenter CONSTANT NUMBER (3) := 1;
+wdalignparagraphright CONSTANT NUMBER (3) := 2;
+wdseekcurrentpageheader CONSTANT NUMBER (3) := 9;
+wdseekcurrentpagefooter CONSTANT NUMBER (3) := 10;
+wdseekmaindocument CONSTANT NUMBER (3) := 0;
+wdfieldpage CONSTANT NUMBER (3) := 33;
+wdfieldnumpages CONSTANT NUMBER (3) := 26;
+wdpagebreak CONSTANT NUMBER (3) := 7;
+wdstory CONSTANT NUMBER (3) := 6;
+wdword CONSTANT NUMBER (5) := 2;
+wdsentence CONSTANT NUMBER (5) := 3;
+wdword8tablebehavior CONSTANT NUMBER (5) := 0;
+wdword9tablebehavior CONSTANT NUMBER (5) := 1;
+wdautofitcontent CONSTANT NUMBER (5) := 1;
+wdautofitfixed CONSTANT NUMBER (5) := 0;
+wdautofitwindow CONSTANT NUMBER (5) := 2;
+wdunderlinesingle CONSTANT NUMBER (5) := 1;
+---- wdUnits Class members
+wdcell CONSTANT NUMBER (5) := 12;
+wdcharacter CONSTANT NUMBER (5) := 1;
+wdword CONSTANT NUMBER (5) := 2;
+wdsentence CONSTANT NUMBER (5) := 3;
+wdline CONSTANT NUMBER (5) := 5;
+---- wdMovementType Class members
+wdextend CONSTANT NUMBER (5) := 1;
+wdmove CONSTANT NUMBER (5) := 0;
+--wdBorderType Class members
+wdborderleft CONSTANT NUMBER := -2;
+wdborderright CONSTANT NUMBER := -4;
+wdbordertop CONSTANT NUMBER := -1;
+wdborderbottom CONSTANT NUMBER := -3;
+--WdLineStyle Class member
+wdlinestylenone CONSTANT NUMBER := 0;
+mytab CONSTANT VARCHAR2 (1) := CHR (9);
+myblue CONSTANT NUMBER (8) := 16711680; --FF0000
+mygreen CONSTANT NUMBER (8) := 65280; --00FF00
+myred CONSTANT NUMBER (8) := 255; --0000FF
+mydkgreen CONSTANT NUMBER (8) := 32768; --008000
+myblack CONSTANT NUMBER (8) := 0; --000000
+mytext VARCHAR2 (2000);
+
+
+record_cnt NUMBER :=0;
+BEGIN
+	
+	ag_message('Entra OLE2_WORD_TEST','I');
+
+happlication := CLIENT_ole2.create_obj ('Word.Application');
+CLIENT_ole2.set_property (happlication,'Visible',1);
+hdocuments :=CLIENT_ole2.get_obj_property (happlication, 'Documents');
+hdocument := CLIENT_ole2.invoke_obj (hdocuments, 'Add');
+------------------------------------------
+-------- Create Header and Footer --------
+------------------------------------------
+hwindow :=CLIENT_ole2.get_obj_property (happlication, 'ActiveWindow');
+hpane := CLIENT_ole2.get_obj_property (hwindow, 'ActivePane');
+hview := CLIENT_ole2.get_obj_property (hpane, 'View');
+---- Header Section ---
+CLIENT_ole2.set_property (hview,'SeekView',wdseekcurrentpageheader);
+hselection :=CLIENT_ole2.get_obj_property (happlication, 'Selection');
+hfont := CLIENT_ole2.get_obj_property (hselection, 'Font');
+CLIENT_ole2.set_property (hfont,'Name','Calibri');
+CLIENT_ole2.set_property (hfont,'Size',10);
+CLIENT_ole2.set_property (hfont,'Bold',FALSE);
+CLIENT_ole2.set_property (hfont,'Color',myblack);
+CLIENT_ole2.RELEASE_OBJ (hfont);
+args := CLIENT_ole2.create_arglist;
+--Below is the location of your jpg file that contains the logo and address
+CLIENT_ole2.add_arg (args, 'C:\temp\AMHeader2.jpg');
+hinlineshapes :=CLIENT_ole2.get_obj_property (hselection, 'InlineShapes');
+CLIENT_ole2.invoke (hinlineshapes,'AddPicture',args);
+CLIENT_ole2.destroy_arglist (args);
+CLIENT_ole2.RELEASE_OBJ (hinlineshapes);
+CLIENT_ole2.set_property (hview,'SeekView',wdseekmaindocument);
+CLIENT_ole2.RELEASE_OBJ (hview);
+CLIENT_ole2.RELEASE_OBJ (hpane);
+CLIENT_ole2.RELEASE_OBJ (hwindow);
+-----------------------------
+-------- Insert Text --------
+-----------------------------
+	hwindow :=CLIENT_OLE2.get_obj_property (happlication, 'ActiveWindow');
+	hpane := CLIENT_OLE2.get_obj_property (hwindow, 'ActivePane');
+	hview := CLIENT_OLE2.get_obj_property (hpane, 'View');
+	---- Header Section ---
+	CLIENT_OLE2.set_property (hview,'SeekView'	,wdseekcurrentpageheader);
+	hselection :=CLIENT_OLE2.get_obj_property (happlication, 'Selection');
+	hfont := CLIENT_OLE2.get_obj_property (hselection, 'Font');
+	CLIENT_OLE2.set_property (hfont,'Name','Calibri');
+	CLIENT_OLE2.set_property (hfont,'Size',10);
+	CLIENT_OLE2.set_property (hfont,'Bold',FALSE);
+	CLIENT_OLE2.set_property (hfont,'Color',myblack);
+	CLIENT_OLE2.RELEASE_OBJ (hfont);
+	args := CLIENT_OLE2.create_arglist;
+	--Below is the location of your jpg file that contains the logo and address
+	CLIENT_OLE2.add_arg (args, 'C:\temp\AMHeader2.jpg');
+	hinlineshapes :=CLIENT_OLE2.get_obj_property (hselection, 'InlineShapes');
+	CLIENT_OLE2.invoke (hinlineshapes,'AddPicture',args);
+	CLIENT_OLE2.destroy_arglist (args);
+	CLIENT_OLE2.RELEASE_OBJ (hinlineshapes);
+	CLIENT_OLE2.set_property (hview,'SeekView',wdseekmaindocument);
+	CLIENT_OLE2.RELEASE_OBJ (hview);
+	CLIENT_OLE2.RELEASE_OBJ (hpane);
+	CLIENT_OLE2.RELEASE_OBJ (hwindow);
+	-----------------------------
+	-------- Insert Text --------
+	-----------------------------
+	hfont := CLIENT_OLE2.get_obj_property (hselection, 'Font');
+	CLIENT_OLE2.set_property (hfont,'Name','Calibri');
+	CLIENT_OLE2.set_property (hfont,'Size',9);
+	CLIENT_OLE2.set_property (hfont,'Bold',FALSE);
+	CLIENT_OLE2.set_property (hfont,'Color',myblack);
+	CLIENT_OLE2.invoke (hselection, 'TypeParagraph');
+	hparagraphformat :=CLIENT_OLE2.get_obj_property (hselection, 'ParagraphFormat');
+	CLIENT_OLE2.set_property (hparagraphformat,'Alignment',wdalignparagraphleft);
+	CLIENT_OLE2.RELEASE_OBJ (hparagraphformat);
+	print_line (hselection, 'TITULO DEL DOCUMENTO FECHA ACTUAL :' || TO_CHAR (TRUNC (SYSDATE), 'MM/DD/YYYY'),NULL);
+		ag_message('2º print_line','I');
+
+	--print_line (hselection,' ',NULL);
+
+--The following prints the address of the recipient of the letter.
+print_line (hselection,'addr_line1',NULL);
+print_line (hselection,'addr_line2',NULL);
+print_line (hselection,'addr_line3',NULL);
+print_line (hselection,'addr_line4',NULL);
+print_line (hselection,'addr_line5',NULL);
+
+--ag_message('Call like the one below are to insert blank lines','I');
+--Call like the one below are to insert blank lines
+/*hselection :=CLIENT_ole2.get_obj_property (happlication, 'Selection');
+print_line (hselection,NULL,NULL);
+print_line (hselection,'Your salutation',NULL);
+print_line (hselection,NULL,NULL);
+print_line (hselection,'Ref: ',NULL);
+print_line (hselection,NULL,NULL);
+print_line(hselection,'Whatever text you want to appear on this line.',NULL);
+print_line (hselection,NULL,NULL);*/
+------------------------------
+-------- Create Table --------
+------------------------------
+ag_message(' Create Table ','I');
+
+htables := CLIENT_ole2.get_obj_property (hdocument, 'Tables');
+hrange := CLIENT_ole2.get_obj_property (hselection, 'Range');
+args := CLIENT_ole2.create_arglist;
+CLIENT_ole2.add_arg_obj (args, hrange); --Range 
+CLIENT_ole2.add_arg (args, 1); --NumRows    The rest of the rows are created later as and when required
+CLIENT_ole2.add_arg (args, 6); --NumColumns This creates a table of 6 columns.
+CLIENT_ole2.add_arg (args, wdword9tablebehavior); --DefaultTableBehavior
+CLIENT_ole2.add_arg (args, wdautofitfixed); --FitBehavior
+htable := CLIENT_ole2.invoke_obj (htables,'Add',args);
+CLIENT_ole2.destroy_arglist (args);
+
+-- [Borders removal start]The following piece of code removes all the borders. Use of this is optional.
+ag_message('[Borders removal start]The following piece of code removes all the borders. Use of this is optional. ','I');
+hborders := CLIENT_ole2.get_obj_property (htable, 'Borders');          
+CLIENT_ole2.set_property (hborders ,'OutsideLineStyle',wdlinestylenone);
+CLIENT_ole2.set_property (hborders,'InsideLineStyle',wdlinestylenone);
+CLIENT_ole2.RELEASE_OBJ (hborders);
+--[Borders removal end]
+
+--The following code makes the cursor enter the table. I took quite some time
+--figuring this out.
+
+hselection := CLIENT_ole2.get_obj_property (hdocument, 'Tables');
+hselection := CLIENT_ole2.get_obj_property (happlication, 'Selection');
+
+--WRITE_HEADINGS is the procedure called each time only to write headings.
+
+write_headings (hselection,'Heading 1 on cell at row 1 column 1',8);
+--The following moves the cursor to the next cell on the right.
+ag_messAge('The following moves the cursor to the next cell on the right.','I');
+args := CLIENT_ole2.create_arglist;
+CLIENT_ole2.add_arg (args, wdcell);
+CLIENT_ole2.add_arg (args, 1);
+CLIENT_ole2.add_arg (args, wdmove);
+CLIENT_ole2.invoke (hselection,'MoveRight',args);
+CLIENT_ole2.destroy_arglist (args);
+
+ag_messAge('Heading 1 on cell at row 1 column 2','I');
+write_headings (hselection,'Heading 1 on cell at row 1 column 2',7);
+args := CLIENT_ole2.create_arglist;
+CLIENT_ole2.add_arg (args, wdcell);
+CLIENT_ole2.add_arg (args, 1);
+CLIENT_ole2.add_arg (args, wdmove);
+CLIENT_ole2.invoke (hselection,'MoveRight',args);
+CLIENT_ole2.destroy_arglist (args);
+
+
+ag_messAge('Heading 1 on cell at row 1 column 3','I');
+write_headings (hselection,'Heading 1 on cell at row 1 column 3',7);
+args := CLIENT_ole2.create_arglist;
+CLIENT_ole2.add_arg (args, wdcell);
+CLIENT_ole2.add_arg (args, 1);
+CLIENT_ole2.add_arg (args, wdmove);
+CLIENT_ole2.invoke (hselection,'MoveRight',args);
+CLIENT_ole2.destroy_arglist (args);
+
+ag_messAge('Heading 1 on cell at row 1 column 4','I');
+write_headings (hselection,'Heading 1 on cell at row 1 column 4',8);
+args := CLIENT_ole2.create_arglist;
+CLIENT_ole2.add_arg (args, wdcell);
+CLIENT_ole2.add_arg (args, 1);
+CLIENT_ole2.add_arg (args, wdmove);
+CLIENT_ole2.invoke (hselection,'MoveRight',args);
+CLIENT_ole2.destroy_arglist (args);
+
+ag_messAge('Heading 1 on cell at row 1 column 5','I');
+write_headings (hselection,'Heading 1 on cell at row 1 column 5',5);
+args := CLIENT_ole2.create_arglist;
+CLIENT_ole2.add_arg (args, wdcell);
+CLIENT_ole2.add_arg (args, 1);
+CLIENT_ole2.add_arg (args, wdmove);
+CLIENT_ole2.invoke (hselection,'MoveRight',args);
+CLIENT_ole2.destroy_arglist (args);
+
+
+
+ag_messAge('Heading 1 on cell at row 1 column 6','I');
+write_headings (hselection,'Heading 1 on cell at row 1 column 6',6);--8
+--The following moves the cursor back to the first cell on row 1 column 1
+ag_message('The following moves the cursor back to the first cell on row 1 column 1','I');
+args := CLIENT_ole2.create_arglist;
+CLIENT_ole2.add_arg (args, wdcell);
+CLIENT_ole2.add_arg (args, 6);
+CLIENT_ole2.add_arg (args, wdmove);
+CLIENT_ole2.invoke (hselection,'MoveLeft',args);
+CLIENT_ole2.destroy_arglist (args);
+
+ag_message('Now we need to write data sourced from a multi record block in Oracle Forms','I');
+
+ag_message('GO_BLOCK (your_block)','I');
+GO_BLOCK ('DEP');
+FIRST_RECORD;
+record_cnt := 0;
+
+LOOP
+	record_cnt := record_cnt + 1;
+
+---In my application I gave the choice to the user to put a check mark on those records that he would want to print ------on the document and so the following.
+
+	--IF :your_block.cb_print = 'Y' THEN               
+	--This creates a new row below the first row that contains the column headers.
+	args := CLIENT_ole2.create_arglist; CLIENT_ole2.add_arg (args, 1);
+	CLIENT_ole2.invoke (hselection,'InsertRowsBelow',args);
+	CLIENT_ole2.destroy_arglist (args);
+
+	--WRITE_DATA is called each time to write the data in the cells.
+
+	write_data (hselection, :dep.CODALF);
+	args := CLIENT_ole2.create_arglist;
+	CLIENT_ole2.add_arg (args, wdcell);
+	CLIENT_ole2.add_arg (args, 1);
+	CLIENT_ole2.add_arg (args, wdmove);
+	CLIENT_ole2.invoke (hselection,'MoveRight',args);
+	CLIENT_ole2.destroy_arglist (args);
+	write_data (hselection, :DEP.NOMID3);
+	args := CLIENT_ole2.create_arglist;
+	CLIENT_ole2.add_arg (args, wdcell);
+	CLIENT_ole2.add_arg (args, 1);
+	CLIENT_ole2.add_arg (args, wdmove);
+	CLIENT_ole2.invoke (hselection,'MoveRight',args);
+	CLIENT_ole2.destroy_arglist (args);
+	write_data (hselection,:DEP.CODMEC);
+	args := CLIENT_ole2.create_arglist;
+	CLIENT_ole2.add_arg (args, wdcell);
+	CLIENT_ole2.add_arg (args, 1);
+	CLIENT_ole2.add_arg (args, wdmove);
+	CLIENT_ole2.invoke (hselection,'MoveRight',args);
+	CLIENT_ole2.destroy_arglist (args);
+	write_data (hselection,:DEP.ID_PERFIL);
+	args := CLIENT_ole2.create_arglist;
+	CLIENT_ole2.add_arg (args, wdcell);
+	CLIENT_ole2.add_arg (args, 1);
+	CLIENT_ole2.add_arg (args, wdmove);
+	CLIENT_ole2.invoke (hselection,'MoveRight',args);
+	CLIENT_ole2.destroy_arglist (args);
+	write_data (hselection,:DEP.l_perf_des_perfil);
+	args := CLIENT_ole2.create_arglist;
+	CLIENT_ole2.add_arg (args, wdcell);
+	CLIENT_ole2.add_arg (args, 1);
+	CLIENT_ole2.add_arg (args, wdmove);
+	CLIENT_ole2.invoke (hselection,'MoveRight',args);
+	CLIENT_ole2.destroy_arglist (args);
+	write_data (hselection,:DEP.L_UNI_NOMUNI);
+	--END IF;
+
+	EXIT WHEN :SYSTEM.LAST_RECORD = 'TRUE';
+	NEXT_RECORD;
+	END LOOP;
+
+--The following makes the cursor exit the table and back on document for any further
+--writing of text.
+
+args := CLIENT_ole2.create_arglist;
+CLIENT_ole2.add_arg (args, wdline);
+CLIENT_ole2.add_arg (args, 1);
+CLIENT_ole2.add_arg (args, wdmove);
+CLIENT_ole2.invoke (hselection,'MoveDown',args);
+
+print_line (hselection           --As mentioned earlier, this enters a blank line.
+			,NULL,NULL);
+
+print_line (hselection,'Boilerplate text: ',NULL);
+
+print_line (hselection,'Boilerplate text: ',NULL);
+
+--You can print as many lines as required by making call to the PRINT_LINE procedure.
+
+CLIENT_ole2.RELEASE_OBJ (htables);
+CLIENT_ole2.RELEASE_OBJ (hfont);
+CLIENT_ole2.RELEASE_OBJ (hselection);
+CLIENT_ole2.RELEASE_OBJ (hdocument);
+CLIENT_ole2.RELEASE_OBJ (hdocuments);
+CLIENT_ole2.RELEASE_OBJ (happlication);
+END;
+
+/*********/
+
+PROCEDURE WRITE_DATA (SELIN CLIENT_OLE2.OBJ_TYPE, TEXTIN VARCHAR2)
+IS
+
+/*This procedure writes data in the cells of the table
+*/
+hFont     CLIENT_OLE2.OBJ_TYPE;
+v_args CLIENT_OLE2.LIST_TYPE;
+
+wdCharacter CONSTANT number(5) := 1; --Default
+--wdUnderline Class members
+wdUnderlineSingle                     CONSTANT NUMBER(5) := 0;
+
+
+---- wdMovementType Class members
+wdExtend CONSTANT number(5) := 1;
+wdMove CONSTANT number(5) := 0; --Default
+
+---- WdParagraphAlignment Class members
+wdAlignParagraphCenter CONSTANT number(5) := 1;
+wdAlignParagraphLeft CONSTANT number(5) := 0;
+wdAlignParagraphRight CONSTANT number(5) := 2;
+
+---- HexColor = BBGGRR
+myLightBlue CONSTANT number(8) := 16755370; --FFAAAA
+
+
+BEGIN
+     AG_MESSAGE('ENTRA WRITE_DATA','I');
+hFont := CLIENT_OLE2.GET_OBJ_PROPERTY(selin, 'Font');
+CLIENT_OLE2.SET_PROPERTY(hFont, 'Name', 'Calibri');
+CLIENT_OLE2.SET_PROPERTY(hFont, 'Size', 10);
+CLIENT_OLE2.SET_PROPERTY(hFont, 'Bold', False);
+CLIENT_OLE2.SET_PROPERTY(hFont, 'Underline', wdUnderlineSingle);
+CLIENT_OLE2.RELEASE_OBJ(hFont);
+
+v_args := CLIENT_OLE2.CREATE_ARGLIST;
+CLIENT_OLE2.ADD_ARG(v_args, textin);
+CLIENT_OLE2.INVOKE(selin, 'TypeText', v_args);
+CLIENT_OLE2.DESTROY_ARGLIST(v_args);
+
+
+
+
+END;
+
+/****************************/
+PROCEDURE write_headings (SELIN CLIENT_OLE2.OBJ_TYPE, TEXTIN VARCHAR2, COUNTIN NUMBER) IS
+/* This procedure is used to write headings in the first row of the table.
+SELIN is the Selection object
+TEXTIN is the boilerplate text to be written as the header of a column.
+COUNTIN is the number of characters in the header text. This is required
+to replicate the action bolding the font of the header.
+*/
+
+
+hFont          CLIENT_OLE2.OBJ_TYPE;
+v_args CLIENT_OLE2.LIST_TYPE;
+
+wdCharacter CONSTANT number(5) := 1; --Default
+--wdUnderline Class members
+wdUnderlineSingle                     CONSTANT NUMBER(5) := 1;
+
+
+---- wdMovementType Class members
+wdExtend CONSTANT number(5) := 1;
+wdMove CONSTANT number(5) := 0; --Default
+
+---- WdParagraphAlignment Class members
+wdAlignParagraphCenter CONSTANT number(5) := 1;
+wdAlignParagraphLeft CONSTANT number(5) := 0;
+wdAlignParagraphRight CONSTANT number(5) := 2;
+
+---- HexColor = BBGGRR
+myLightBlue CONSTANT number(8) := 16755370; --FFAAAA
+
+
+BEGIN
+	
+	AG_MESSAGE('ENTRA write_headings','I');
+     
+hFont := CLIENT_OLE2.GET_OBJ_PROPERTY(selin, 'Font');
+CLIENT_OLE2.SET_PROPERTY(hFont, 'Name', 'Calibri');
+CLIENT_OLE2.SET_PROPERTY(hFont, 'Size', 10);
+CLIENT_OLE2.SET_PROPERTY(hFont, 'Bold', True);
+CLIENT_OLE2.RELEASE_OBJ(hFont);
+
+v_args := CLIENT_OLE2.CREATE_ARGLIST;
+CLIENT_OLE2.ADD_ARG(v_args, textin);
+CLIENT_OLE2.INVOKE(selin, 'TypeText', v_args);
+CLIENT_OLE2.DESTROY_ARGLIST(v_args);
+
+v_args := CLIENT_OLE2.CREATE_ARGLIST;
+CLIENT_OLE2.ADD_ARG(v_args, wdCharacter);
+CLIENT_OLE2.ADD_ARG(v_args, countin);
+CLIENT_OLE2.ADD_ARG(v_args, wdMove);
+CLIENT_OLE2.INVOKE(selin, 'MoveLeft', v_args);
+CLIENT_OLE2.DESTROY_ARGLIST(v_args);
+
+v_args := CLIENT_OLE2.CREATE_ARGLIST;
+CLIENT_OLE2.ADD_ARG(v_args, wdCharacter); --Unit
+CLIENT_OLE2.ADD_ARG(v_args, countin); --Count
+CLIENT_OLE2.ADD_ARG(v_args, wdExtend); --Extend
+CLIENT_OLE2.INVOKE(selin, 'MoveRight', v_args);
+CLIENT_OLE2.DESTROY_ARGLIST(v_args);
+
+hFont := CLIENT_OLE2.GET_OBJ_PROPERTY(selin, 'Font');
+CLIENT_OLE2.SET_PROPERTY(hFont, 'Underline', wdUnderlineSingle);
+CLIENT_OLE2.RELEASE_OBJ(hFont);
+
+
+END;
+
+PROCEDURE PRINT_LINE
+( v_sel CLIENT_OLE2.OBJ_TYPE
+, v_text VARCHAR2
+, v_field varchar2)
+IS
+
+/* This procedure takes in three arguments.
+The first v_sel is the VB selection object.
+v_text is the static or boilerplate text that needs to be printed on the document.
+v_field is the value of the item or variable from the program.
+*/
+v_args      CLIENT_OLE2.LIST_TYPE;
+hTab     CONSTANT varchar2(1) := chr(9); --This is the vb constant for tabstop
+BEGIN
+ag_message('Entra PRINT_LINE','I');
+v_args := CLIENT_OLE2.CREATE_ARGLIST;
+CLIENT_OLE2.ADD_ARG(v_args, v_text);
+CLIENT_OLE2.INVOKE(v_sel, 'TypeText', v_args);
+CLIENT_OLE2.DESTROY_ARGLIST(v_args);
+ag_message('Entra PRINT_LINE 1','I');
+--The following replicates tabbing. This was used so that the field values are aligned at a tabstop.
+--When printing a blank line NULL is passed in as the argument
+	v_args := CLIENT_OLE2.CREATE_ARGLIST;
+     CLIENT_OLE2.ADD_ARG(v_args, hTab);
+     CLIENT_OLE2.INVOKE(v_sel, 'TypeText', v_args);
+     CLIENT_OLE2.DESTROY_ARGLIST(v_args);
+     ag_message('Entra PRINT_LINE 2','I');
+--The following writes the value of the variable at the tabstop.      
+    /*v_args := CLIENT_OLE2.CREATE_ARGLIST;
+		CLIENT_OLE2.ADD_ARG(v_args, v_field);
+		CLIENT_OLE2.INVOKE(v_sel, 'TypeText', v_args);
+		CLIENT_OLE2.DESTROY_ARGLIST(v_args);
+*/
+CLIENT_OLE2.INVOKE(v_sel, 'TypeParagraph');
+
+	ag_message('Sale PRINT_LINE','I');
+END;
+
+
+

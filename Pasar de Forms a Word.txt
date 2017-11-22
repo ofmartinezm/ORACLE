@@ -1,0 +1,198 @@
+https://sites.google.com/site/craigsoraclestuff/oracle-forms-webutil/read-excel-into-forms
+http://codingwithpassion.blogspot.com.co/2011/02/plsql-forms-word-and-excel-manipulation.html
+https://community.oracle.com/thread/1053854?start=0&tstart=0
+http://pen-d-code.blogspot.com.co/2008/06/integrar-ms-word-con-oracle-forms-10g.html
+
+http://matt.gizma.com/2006/08/microsoft_word_wordbasic_integ.html
+
+http://www.todoexpertos.com/categorias/tecnologia-e-internet/bases-de-datos/oracle/respuestas/362078/invocar-word-desde-forms
+
+https://groups.google.com/forum/#!topic/comp.databases.oracle.tools/X35pcUQii04
+
+DECLARE
+ hApplication CLIENT_OLE2.OBJ_TYPE;
+ hDocuments CLIENT_OLE2.OBJ_TYPE;
+ hNewDocument CLIENT_OLE2.OBJ_TYPE; 
+ hDocument CLIENT_OLE2.OBJ_TYPE; 
+ hSelection CLIENT_OLE2.OBJ_TYPE; 
+ args CLIENT_OLE2.LIST_TYPE;
+ v_data varchar2(5000);
+ v_form varchar2(200);
+BEGIN
+ag_message('mensaje 0','I');
+hApplication := CLIENT_OLE2.create_obj ('Word.Application');
+ag_message('mensaje 1','I');
+CLIENT_OLE2.set_property (hApplication, 'Visible', 1);
+ag_message('mensaje 2','I');
+hDocuments := CLIENT_OLE2.get_obj_property (hApplication, 'Documents');
+ag_message('mensaje 3','I');
+args := CLIENT_OLE2.create_arglist;
+ag_message('mensaje 4','I');
+CLIENT_OLE2.add_arg(args, 'C:\temp\MYDOC.docx');
+ag_message('mensaje 5','I');
+hDocument :=CLIENT_OLE2.invoke_obj (hDocuments, 'Open', args);
+ag_message('mensaje 6','I');
+hSelection := CLIENT_OLE2.get_obj_property(hApplication, 'Selection');
+
+ag_message('abrio el documento plantilla','I');
+--((select account_number into l_acc_no from customer_table where blah, blah, blah))
+
+-- Go to the 1st bookmark
+
+args := CLIENT_OLE2.create_arglist;
+CLIENT_OLE2.add_arg (args, -1);
+CLIENT_OLE2.add_arg (args, 0);
+CLIENT_OLE2.add_arg (args, 0);
+CLIENT_OLE2.add_arg (args, 'TITULO'); -- the name you gave your 1st bookmark in your template
+CLIENT_OLE2.invoke (hSelection,'GoTo',args);
+CLIENT_OLE2.destroy_arglist (args);
+CLIENT_OLE2.set_property (hSelection, 'Text', 'ESTE ES EL TÍTULO DEL DOCUMENTO'); -- Print your text value
+ag_message('entra al primer marcador','I');
+-- Go to the 2nd bookmark on the line below your column headings in the 1st empty cell of your table
+
+args := CLIENT_OLE2.create_arglist;
+CLIENT_OLE2.add_arg (args, -1);
+CLIENT_OLE2.add_arg (args, 0);
+CLIENT_OLE2.add_arg (args, 0);
+CLIENT_OLE2.add_arg (args, 'CONTENIDO'); -- the name you gave your 2nd bookmark in your template.
+CLIENT_OLE2.invoke (hSelection,'GoTo',args);
+CLIENT_OLE2.destroy_arglist (args);
+
+
+--RECORRIDO DEL BLOQUE REGISTRO POR REGISTRO
+		go_block ( 'DEP' );
+		first_record;
+		loop
+			v_data:= v_data || :dep.codalf||:dep.nomid3||:DEP.CODMEC||:DEP.DATALTA||:DEP.DATBAJA||:DEP.ID_PERFIL||'-'||:DEP.L_PERF_DES_PERFIL||
+			:DEP.UNI_CODALF||'-'||:DEP.L_UNI_NOMUNI||:DEP.PRV_CODNUM||'-'||:DEP.L_PRV_NOMPRV ||CHR(13);
+		--Comparacion y/o proceso que se quiera hacer en cada registro.
+		--Instrucciones
+			CLIENT_OLE2.set_property (hSelection, 'Text', :dep.codalf); -- Put text in 1st cell
+
+			args := CLIENT_OLE2.create_arglist;
+			CLIENT_OLE2.add_arg (args, 12);
+			CLIENT_OLE2.invoke (hSelection, 'MoveRight', args);
+			CLIENT_OLE2.destroy_arglist (args);
+			
+			CLIENT_OLE2.set_property (hSelection, 'Text', :dep.nomid3); -- Put text in 2nd cell
+			
+			args := CLIENT_OLE2.create_arglist;
+			CLIENT_OLE2.add_arg (args, 12);
+			CLIENT_OLE2.invoke (hSelection, 'MoveRight', args); -- Will move to next line
+			CLIENT_OLE2.destroy_arglist (args);
+			
+			CLIENT_OLE2.set_property (hSelection, 'Text', :DEP.ID_PERFIL||'-'||:DEP.L_PERF_DES_PERFIL); -- Put text in 3rd cell
+			
+			args := CLIENT_OLE2.create_arglist;
+			CLIENT_OLE2.add_arg (args, 12);
+			CLIENT_OLE2.invoke (hSelection, 'MoveRight', args);
+			CLIENT_OLE2.destroy_arglist (args);
+			
+			CLIENT_OLE2.set_property (hSelection, 'Text', :DEP.UNI_CODALF||'-'||:DEP.L_UNI_NOMUNI); -- Put text in 4th cell
+			
+			args := CLIENT_OLE2.create_arglist;
+			CLIENT_OLE2.add_arg (args, 12);
+			CLIENT_OLE2.invoke (hSelection, 'MoveRight', args);
+			CLIENT_OLE2.destroy_arglist (args);
+			
+			if :system.last_record = 'TRUE' then
+			exit;
+			end if;
+			next_record;
+			end loop; 
+
+-- Save the document as a new file
+ag_message('antes de guardar el nuevo documento','I');
+hNewDocument := CLIENT_OLE2.get_obj_property (hApplication, 'ActiveDocument');
+CLIENT_OLE2.set_property (hNewDocument, 'ReadOnlyRecommended', -1);
+args := CLIENT_OLE2.create_arglist;
+CLIENT_OLE2.add_arg (args, 'c:\temp\MyNewDoc.docx');
+CLIENT_OLE2.invoke (hDocuments, 'SaveAs', args);
+CLIENT_OLE2.destroy_arglist (args);
+
+ag_message('guarda el nuevo documento','I');
+
+-- Quit Word
+
+args := CLIENT_OLE2.create_arglist;
+CLIENT_OLE2.add_arg (args, 0);
+CLIENT_OLE2.invoke (hDocument, 'QUIT', args);
+CLIENT_OLE2.destroy_arglist (args);
+CLIENT_OLE2.release_obj (hApplication);
+CLIENT_OLE2.release_obj (hDocuments);
+CLIENT_OLE2.release_obj (hSelection); 
+
+END;
+
+
+/*********************************************************************/
+
+DECLARE
+ app CLIENT_OLE2.OBJ_TYPE;
+ docs CLIENT_OLE2.OBJ_TYPE; 
+ doc CLIENT_OLE2.OBJ_TYPE; 
+ selection CLIENT_OLE2.OBJ_TYPE; 
+ args CLIENT_OLE2.LIST_TYPE;
+ v_data varchar2(5000);
+ v_form varchar2(200);
+BEGIN
+	-- nombre de la forma actual
+	   v_form := NAME_IN('SYSTEM.CURRENT_block');
+   	 -- v_form := UPPER(SUBSTR(v_bloque,1,INSTR(v_bloque,'$')-1));
+-- create a new document
+ app := CLIENT_OLE2.CREATE_OBJ('Word.Application');
+ CLIENT_OLE2.SET_PROPERTY(app,'Visible',1);
+
+ docs := CLIENT_OLE2.GET_OBJ_PROPERTY(app, 'Documents');
+ doc := CLIENT_OLE2.INVOKE_OBJ(docs, 'add');
+
+ selection := CLIENT_OLE2.GET_OBJ_PROPERTY(app, 'Selection');
+
+ -- nombre de la forma actual
+	    v_form := SUBSTR('DEP',LENGTH(NAME_IN('SYSTEM.CURRENT_FORM'))+2);
+   	  v_form := UPPER(SUBSTR(v_form,1,INSTR(v_form,'$')-1));
+		
+	 -- insert data into new document from long item
+	v_data:=v_form||chr(13)||chr(13)||chr(13);
+ 
+ 
+ --RECORRIDO DEL BLOQUE REGISTRO POR REGISTRO
+		go_block ( 'DEP' );
+		first_record;
+		loop
+			v_data:= v_data || :dep.codalf||:dep.nomid3||:DEP.CODMEC||:DEP.DATALTA||:DEP.DATBAJA||:DEP.ID_PERFIL||'-'||:DEP.L_PERF_DES_PERFIL||
+			:DEP.UNI_CODALF||'-'||:DEP.L_UNI_NOMUNI||:DEP.PRV_CODNUM||'-'||:DEP.L_PRV_NOMPRV ||CHR(13);
+		--Comparacion y/o proceso que se quiera hacer en cada registro.
+		--Instrucciones
+		if :system.last_record = 'TRUE' then
+		exit;
+		end if;
+		next_record;
+		end loop; 
+		
+		
+		 CLIENT_OLE2.SET_PROPERTY(selection, 'Text',v_data);
+
+ --
+
+ -- save document as example.doc
+ args := CLIENT_OLE2.CREATE_ARGLIST;
+ CLIENT_OLE2.ADD_ARG(args, 'c:\temp\pruebaForms_to_word.doc');
+ CLIENT_OLE2.INVOKE(doc, 'SaveAs', args);
+ CLIENT_OLE2.DESTROY_ARGLIST(args);
+
+ -- close example.doc
+ args := CLIENT_OLE2.CREATE_ARGLIST;
+ CLIENT_OLE2.ADD_ARG(args, 0);
+ CLIENT_OLE2.INVOKE(doc, 'Close', args);
+ CLIENT_OLE2.DESTROY_ARGLIST(args);
+
+ CLIENT_OLE2.RELEASE_OBJ(selection);
+ CLIENT_OLE2.RELEASE_OBJ(doc); 
+ CLIENT_OLE2.RELEASE_OBJ(docs); 
+
+--	CLIENT_OLE2.SET_PROPERTY(P_OBJ,'Visible',1);
+-- exit MSWord 
+
+ CLIENT_OLE2.INVOKE(app,'Quit');
+END;
