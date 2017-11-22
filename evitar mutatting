@@ -1,0 +1,14 @@
+
+DBMS_APPLICATION_INFO.SET_MODULE ('uib$gfin', 'conciliarrecibo');
+DBMS_APPLICATION_INFO.SET_MODULE ( 'null', 'null');   
+
+
+
+	v_modulo varchar2(200);
+  v_accion 	varchar2(200);
+dbms_application_info.read_module(v_modulo, v_accion);
+If nvl(v_modulo, '$$') NOT  LIKE '%uib$gfin%' then 
+
+
+dalu_lac_briu --23.14.4.0
+DALU_ACT_BRU--23.14.2.0
